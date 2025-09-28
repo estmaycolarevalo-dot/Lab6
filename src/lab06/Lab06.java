@@ -18,7 +18,6 @@ public class Lab06 extends JFrame {
     private JButton btnStart, btnReset;
     private DefaultTableModel resultadoModel;
 
-    // estructura para tiempos
     static class Resultado {
         int id;
         long tiempoMs;
@@ -42,7 +41,7 @@ public class Lab06 extends JFrame {
         bottom.add(btnStart);
         bottom.add(btnReset);
 
-        resultadoModel = new DefaultTableModel(new String[]{"Posición","Auto ID","Tiempo (s)"} ,0);
+        resultadoModel = new DefaultTableModel(new String[]{"Posicion","Auto ID","Tiempo (s)"} ,0);
         JTable tablaRes = new JTable(resultadoModel);
         JScrollPane sp = new JScrollPane(tablaRes);
         sp.setPreferredSize(new Dimension(260, PISTA_ALTO));
@@ -92,7 +91,6 @@ public class Lab06 extends JFrame {
         SwingUtilities.invokeLater(Lab06::new);
     }
 
-    // Panel que dibuja la pista y maneja hilos de los autos
     static class RacePanel extends JPanel {
         interface FinishCallback { void onFinish(int id, long tiempoMs); }
 
@@ -115,7 +113,6 @@ public class Lab06 extends JFrame {
         }
 
         public void resetPositions(){
-            // detener carrera internamente y resetear contadores y posiciones
             running = false;
             finishedCount.set(0);
             for(int i=0;i<numAutos;i++){
@@ -126,12 +123,10 @@ public class Lab06 extends JFrame {
         }
 
         public void startRace(FinishCallback cb){
-            if(running) return;          // si ya está corriendo, no hacer nada
+            if(running) return;          
             this.callback = cb;
-            // resetear posiciones y contador antes de arrancar
             resetPositions();
             finishedCount.set(0);
-            // activar corrida
             running = true;
             for(int i=0;i<numAutos;i++){
                 final int id = i+1;
@@ -146,11 +141,11 @@ public class Lab06 extends JFrame {
             Random rnd = new Random();
             long start = System.currentTimeMillis();
             while(xPositions[idx] < meta && running){
-                int avance = 1 + rnd.nextInt(6); // 1..6 px por iteracion
+                int avance = 1 + rnd.nextInt(6);
                 xPositions[idx] += avance;
                 SwingUtilities.invokeLater(this::repaint);
                 try {
-                    int sleep = 20 + rnd.nextInt(60); // entre 20 y 80 ms
+                    int sleep = 20 + rnd.nextInt(60);
                     Thread.sleep(sleep);
                 } catch (InterruptedException e){
                     break;
@@ -160,11 +155,7 @@ public class Lab06 extends JFrame {
             long tiempo = end - start;
             xPositions[idx] = Math.min(xPositions[idx], meta);
             SwingUtilities.invokeLater(this::repaint);
-
-            // notificar final al callback
             if(callback != null) callback.onFinish(id, tiempo);
-
-            // actualizar contador de finalizados; si todos terminaron cambiar running = false
             int finished = finishedCount.incrementAndGet();
             if(finished >= numAutos){
                 running = false;
